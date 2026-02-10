@@ -13,6 +13,7 @@ const NotificationRoute = require("./routes/NotificationsRoute.js");
 const PosteRoute = require("./routes/PosteRoute.js");
 const RapportMissionRoute = require("./routes/RapportMissionRoute.js");
 const ServiceRoute = require("./routes/ServiceRoute.js");
+const MetierRoute = require("./routes/MetierRoute.js");
 const AuthRoute = require("./routes/AuthRoute.js");
 
 //création des serveurs
@@ -57,6 +58,7 @@ app.use("/api/notifications", NotificationRoute);
 app.use("/api/postes", PosteRoute);
 app.use("/api/services", ServiceRoute);
 app.use("/api/rapports/missions", RapportMissionRoute);
+app.use("/api/metiers", MetierRoute);
 
 //Demarrage avec la base de donnée
 const PORT = process.env.PORT || 5000;

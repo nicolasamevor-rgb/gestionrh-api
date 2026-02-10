@@ -1,4 +1,4 @@
-const { Poste } = require("../models/index");
+const { Poste, Personne, Metier } = require("../models/index");
 
 exports.createPoste = async (req, res) => {
   try {
@@ -11,7 +11,19 @@ exports.createPoste = async (req, res) => {
 
 exports.getAllPostes = async (req, res) => {
   try {
-    const postes = await Poste.findAll();
+    const postes = await Poste.findAll({
+      include: [
+        {
+          model: Personne,
+          as: "titulairePoste",
+          attributes: ["id", "nom", "prenoms"],
+        },
+        {
+          model: Metier,
+          as: "metier",
+        },
+      ],
+    });
     res.status(200).json(postes);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -34,12 +46,25 @@ exports.getPosteById = async (req, res) => {
 
 exports.updatePoste = async (req, res) => {
   const { id } = req.params;
+  const {
+    createdAt,
+    updatedAt,
+    id: bodyId,
+    metier,
+    titulairePoste,
+    ...dataToUpdate
+  } = req.body;
   try {
-    const [updated] = await Poste.update(req.body, {
+    const [updated] = await Poste.update(dataToUpdate, {
       where: { id },
     });
     if (updated) {
-      const updatedPoste = await Poste.findByPk(id);
+      const updatedPoste = await Poste.findByPk(id, {
+        include: [
+          { model: Personne, as: "titulairePoste" },
+          { model: Metier, as: "metier" },
+        ],
+      });
       res.status(200).json(updatedPoste);
     } else {
       res.status(404).json({ error: "Poste non trouvé" });

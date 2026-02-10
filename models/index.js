@@ -96,9 +96,9 @@ Poste.belongsTo(Service, {
   as: "ServiceRattachement",
 });
 
-Personne.hasMany(Poste, {
+Personne.hasOne(Poste, {
   foreignKey: "personneId",
-  as: "postesPersonne",
+  as: "posteActuel",
 });
 
 Poste.belongsTo(Personne, {

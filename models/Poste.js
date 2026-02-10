@@ -21,7 +21,16 @@ const Poste = sequelize.define(
       type: DataTypes.FLOAT, // Optionnel, utile pour la gestion RH
       allowNull: true,
     },*/
+    personneId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      unique: true,
+      references: {
+        model: "Personne",
+        key: "id",
+      },
+    },
   },
-  { tableName: "postes", paranoid: true }
+  { tableName: "postes", paranoid: true },
 );
 module.exports = Poste;
