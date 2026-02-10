@@ -15,6 +15,8 @@ const RapportMissionRoute = require("./routes/RapportMissionRoute.js");
 const ServiceRoute = require("./routes/ServiceRoute.js");
 const MetierRoute = require("./routes/MetierRoute.js");
 const AuthRoute = require("./routes/AuthRoute.js");
+const StatsRoute = require("./routes/StatsRoute.js");
+const { initCronJobs } = require("./jobs/cronJobs.js");
 
 //création des serveurs
 
@@ -59,11 +61,13 @@ app.use("/api/postes", PosteRoute);
 app.use("/api/services", ServiceRoute);
 app.use("/api/rapports/missions", RapportMissionRoute);
 app.use("/api/metiers", MetierRoute);
+app.use("/api/stats", StatsRoute);
 
+initCronJobs();
 //Demarrage avec la base de donnée
 const PORT = process.env.PORT || 5000;
 sequelize
-  .sync({ alter: true })
+  .sync()
   .then(async () => {
     server.listen(PORT, () => {
       console.log(`✅ Serveur lancé sur http://localhost:${PORT}`);

@@ -1,5 +1,5 @@
 const { where } = require("sequelize");
-const { Conge, Personne } = require("../models/index");
+const { Conge, Personne, sequelize } = require("../models/index");
 
 exports.createConge = async (req, res) => {
   try {
@@ -47,25 +47,47 @@ exports.getCongeByPerson = async (req, res) => {
 exports.updateConge = async (req, res) => {
   const { id } = req.params;
   const { typeConge, dateDebut, dateFin, motif, status } = req.body;
+  let t;
   try {
+    t = await sequelize.transaction();
     const [updated] = await Conge.update(
       { typeConge, dateDebut, dateFin, motif, status },
       {
         where: {
           id: id,
         },
+        transaction: t,
       },
     );
     if (updated) {
-      const updatedConge = await Conge.findByPk(id, {
+      const updatedConge = await Conge.findByPk(id, { transaction: t });
+      const today = new Date().toISOString().split("T")[0];
+      if (status === "Approuvé" && dateDebut <= today && dateFin >= today) {
+        await Personne.update(
+          { isActive: 0 },
+          { where: { id: updatedConge.PersonneId }, transaction: t },
+        );
+      } else {
+        await Personne.update(
+          { isActive: 1 },
+          { where: { id: updatedConge.PersonneId }, transaction: t },
+        );
+      }
+      await t.commit();
+      const result = await Conge.findByPk(id, {
         include: [
-          { model: Personne, as: "demandeur", attributes: ["nom", "prenoms"] },
+          {
+            model: Personne,
+            as: "demandeur",
+            attributes: ["nom", "prenoms"],
+          },
         ],
       });
-      return res.status(201).json(updatedConge);
+      return res.status(200).json(result);
     }
     throw new Error("Congé non trouvé");
   } catch (error) {
+    if (t) await t.rollback();
     res.status(400).json({ error: error.message });
   }
 };
