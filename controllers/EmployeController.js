@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const handlebars = require("handlebars");
 const puppeteer = require("puppeteer");
-const { Personne, User, Conge } = require("../models/index");
+const { Personne, User, Conge, Poste, Service } = require("../models/index");
 
 exports.createEmploye = async (req, res) => {
   try {
@@ -28,6 +28,17 @@ exports.getAllEmploye = async (req, res) => {
         {
           model: Conge,
           as: "sesConges",
+        },
+        {
+          model: Poste,
+          as: "posteActuel",
+          include: [
+            {
+              model: Service,
+              as: "ServiceRattachement",
+              attributes: ["id"],
+            },
+          ],
         },
       ],
       where: { "$compte.role$": "employe" },
