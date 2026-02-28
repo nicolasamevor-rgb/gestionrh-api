@@ -1,6 +1,6 @@
-const cloudinary = require('cloudinary').v2;
-const streamifier = require('streamifier'); 
-const dotenv = require('dotenv');
+const cloudinary = require("cloudinary").v2;
+const streamifier = require("streamifier");
+const dotenv = require("dotenv");
 const { RapportMission } = require("../models/index");
 
 //1- Configuration de l'authentification Google
@@ -44,17 +44,21 @@ const uploadToDrive = async (fileObject, missionId) => {
 }*/
 
 // 1. Configuration Cloudinary
-cloudinary.config({ 
-  cloud_name: process.env.CLOUDINAY_CLOUD_NAME, 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 exports.createRapportMission = async (req, res) => {
   try {
     const { titre, commentaire, dateRapport, missionId } = req.body;
     const file = req.file;
-
+    console.log(
+      "****************************************",
+      missionId,
+      "********************************************************",
+    );
     if (!file) {
       return res.status(400).json({ error: "Aucun fichier téléchargé" });
     }
@@ -64,16 +68,16 @@ exports.createRapportMission = async (req, res) => {
       return new Promise((resolve, reject) => {
         let stream = cloudinary.uploader.upload_stream(
           {
-            resource_type: "raw", // Indispensable pour les PDF
+            resource_type: "auto", // Indispensable pour les PDF
             folder: "rapports_missions", // Dossier automatique sur Cloudinary
-            public_id: `Mission_${titre}_${titre.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')}`,
-            format: "pdf" 
-},
-          
+            public_id: `Mission_${titre}_${titre.replace(/\s+/g, "_")}_${new Date().toLocaleDateString("fr-FR").replace(/\//g, "-")}`,
+            format: "pdf",
+          },
+
           (error, result) => {
             if (result) resolve(result);
             else reject(error);
-          }
+          },
         );
         // On envoie le buffer du fichier (venant de Multer) dans le stream
         streamifier.createReadStream(file.buffer).pipe(stream);
@@ -87,20 +91,17 @@ exports.createRapportMission = async (req, res) => {
       titre: titre,
       commentaire: commentaire,
       dateRapport: dateRapport || new Date(),
-      missionId: missionId,
+      MissionId: missionId,
       fichierUrl: cloudinaryResult.secure_url, // L'URL HTTPS générée
-      contenu: ""
+      contenu: "",
     });
 
     res.status(201).json(newRapportMission);
-
   } catch (error) {
     console.error("ERREUR CLOUDINARY/DB :", error);
     res.status(500).json({ error: error.message });
   }
 };
-
-
 
 exports.getAllRapportMissions = async (req, res) => {
   try {

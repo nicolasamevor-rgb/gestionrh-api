@@ -28,10 +28,14 @@ const RapportMission = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    MissionId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
   },
   {
     tableName: "rapportMission",
     paranoid: true,
-  }
+  },
 );
 module.exports = RapportMission;

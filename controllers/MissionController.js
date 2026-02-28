@@ -1,5 +1,10 @@
 const { where } = require("sequelize");
-const { Mission, Service, Personne } = require("../models/index");
+const {
+  Mission,
+  Service,
+  Personne,
+  RapportMission,
+} = require("../models/index");
 
 exports.createMission = async (req, res) => {
   try {
@@ -23,6 +28,10 @@ exports.getAllMissions = async (req, res) => {
           model: Personne,
           as: "responsable",
           attributes: ["nom", "prenoms"],
+        },
+        {
+          model: RapportMission,
+          as: "rapport",
         },
       ],
     });
