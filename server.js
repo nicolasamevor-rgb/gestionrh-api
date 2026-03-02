@@ -1,6 +1,11 @@
 require("dotenv").config();
 const cors = require("cors");
-const { sequelize, User, Personne } = require("./models/index.js");
+const {
+  sequelize,
+  connectWithRetry,
+  User,
+  Personne,
+} = require("./models/index.js");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const http = require("http");
@@ -64,16 +69,21 @@ app.use("/api/metiers", MetierRoute);
 app.use("/api/stats", StatsRoute);
 
 initCronJobs();
-//Demarrage avec la base de donnée
+// Démarrage avec la base de donnée
 const PORT = process.env.PORT || 5000;
-sequelize
-  .sync()
-  .then(async () => {
+
+// on attend d'abord que la connexion soit établie (avec retries)
+connectWithRetry()
+  .then(() => {
+    return sequelize.sync({ alter: true }); // Synchronisation des modèles avec la base de données
+  })
+  .then(() => {
     server.listen(PORT, () => {
       console.log(`✅ Serveur lancé sur http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("❌ Erreur de synchronisation DB:", err);
+    console.error("❌ Erreur lors du démarrage de la base / sync :", err);
+    process.exit(1);
   });
 // Script de migration rapide

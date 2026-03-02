@@ -15,7 +15,7 @@ exports.register = async (req, res) => {
         nom,
         prenoms,
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     // 2. Hashage du mot de passe
@@ -29,7 +29,7 @@ exports.register = async (req, res) => {
         role: role || "employe",
         personneId: nouvellePersonne.id, // On utilise l'ID tout juste généré
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     // Si tout est OK, on valide
@@ -65,7 +65,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { userId: user.id, role: user.role },
       process.env.JWT_SECRET || "ma_cle_secrete_ultra_secure",
-      { expiresIn: "24h" }
+      { expiresIn: "24h" },
     );
 
     // 4. Envoyer le token dans un cookie HttpOnly

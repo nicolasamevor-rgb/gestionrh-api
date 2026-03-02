@@ -19,16 +19,17 @@ const Personne = sequelize.define(
     },
     telephone: {
       type: DataTypes.CHAR,
-      allowNull: false,
+      defaultValue: null,
+      allowNull: true,
       unique: true,
     },
     Smatrimoniale: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     ContatPrevenir: {
       type: DataTypes.CHAR,
-      allowNull: false,
+      allowNull: true,
     },
     competences: {
       type: DataTypes.JSON,
