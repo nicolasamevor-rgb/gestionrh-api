@@ -13,18 +13,15 @@ exports.getAllServices = async (req, res) => {
   try {
     const services = await Service.findAll({
       include: [
-        // 1. Inclure le Directeur et l'Adjoint
         { model: Personne, as: "Directeur", attributes: ["nom", "prenoms"] },
         { model: Personne, as: "Adjoint", attributes: ["nom", "prenoms"] },
 
-        // 2. Inclure les Postes liés à ce service
         {
           model: Poste,
-          as: "Postes", // L'alias doit correspondre à celui défini dans tes associations
+          as: "Postes",
           include: [
-            // 3. Pour chaque poste, inclure le Métier (le titre du rôle)
             { model: Metier, as: "metier", attributes: ["titre"] },
-            // 4. Pour chaque poste, inclure la Personne qui l'occupe (le titulaire)
+
             {
               model: Personne,
               as: "titulairePoste",

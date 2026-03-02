@@ -1,6 +1,11 @@
 require("dotenv").config();
 const cors = require("cors");
-const { sequelize, User, Personne } = require("./models/index.js");
+const {
+  sequelize,
+  connectWithRetry,
+  User,
+  Personne,
+} = require("./models/index.js");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const http = require("http");
@@ -15,6 +20,8 @@ const RapportMissionRoute = require("./routes/RapportMissionRoute.js");
 const ServiceRoute = require("./routes/ServiceRoute.js");
 const MetierRoute = require("./routes/MetierRoute.js");
 const AuthRoute = require("./routes/AuthRoute.js");
+const StatsRoute = require("./routes/StatsRoute.js");
+const { initCronJobs } = require("./jobs/cronJobs.js");
 
 //création des serveurs
 
@@ -59,17 +66,24 @@ app.use("/api/postes", PosteRoute);
 app.use("/api/services", ServiceRoute);
 app.use("/api/rapports/missions", RapportMissionRoute);
 app.use("/api/metiers", MetierRoute);
+app.use("/api/stats", StatsRoute);
 
-//Demarrage avec la base de donnée
+initCronJobs();
+// Démarrage avec la base de donnée
 const PORT = process.env.PORT || 5000;
-sequelize
-  .sync({ alter: true })
-  .then(async () => {
+
+// on attend d'abord que la connexion soit établie (avec retries)
+connectWithRetry()
+  .then(() => {
+    return sequelize.sync({ alter: true }); // Synchronisation des modèles avec la base de données
+  })
+  .then(() => {
     server.listen(PORT, () => {
       console.log(`✅ Serveur lancé sur http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("❌ Erreur de synchronisation DB:", err);
+    console.error("❌ Erreur lors du démarrage de la base / sync :", err);
+    process.exit(1);
   });
 // Script de migration rapide

@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const handlebars = require("handlebars");
 const puppeteer = require("puppeteer");
-const { Personne, User, Conge } = require("../models/index");
+const { Personne, User, Conge, Poste, Service } = require("../models/index");
 
 exports.createEmploye = async (req, res) => {
   try {
@@ -28,6 +28,17 @@ exports.getAllEmploye = async (req, res) => {
         {
           model: Conge,
           as: "sesConges",
+        },
+        {
+          model: Poste,
+          as: "posteActuel",
+          include: [
+            {
+              model: Service,
+              as: "ServiceRattachement",
+              attributes: ["id"],
+            },
+          ],
         },
       ],
       where: { "$compte.role$": "employe" },
@@ -131,18 +142,49 @@ exports.createficheEmploye = async (req, res) => {
     };
 
     const htmlContent = template(data);
+    console.log(
+      "✅ Template HTML généré, taille:",
+      htmlContent.length,
+      "caractères",
+    );
 
     // 4. Puppeteer transforme le HTML en PDF
-    const browser = await puppeteer.launch({ headless: "new" });
+    console.log("🚀 Lancement de Puppeteer...");
+    const browser = await puppeteer.launch({
+      headless: "new",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+      ],
+    });
+    console.log("✅ Browser lancé");
+
     const page = await browser.newPage();
+    console.log("✅ Nouvelle page créée");
+
     await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+    console.log("✅ Contenu HTML injecté dans la page");
+
     const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
+    console.log(
+      "✅ PDF généré avec succès, taille:",
+      pdfBuffer.length,
+      "bytes",
+    );
 
     await browser.close();
+    console.log("✅ Browser fermé");
 
     // 5. Envoi du fichier
-    res.contentType("application/pdf");
+    console.log("📤 Envoi du PDF, type de contenu: application/pdf");
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": "attachment; filename=FichEmploye.pdf",
+      "Content-Length": pdfBuffer.length,
+    });
     res.send(pdfBuffer);
+    console.log("✅ PDF envoyé au client");
   } catch (error) {
     console.error(error);
     res.status(500).send("Erreur serveur lors de la génération du PDF");

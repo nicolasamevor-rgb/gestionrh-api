@@ -6,6 +6,7 @@ const RapportMission = require("./RapportMission");
 const Notification = require("./Notification");
 const Poste = require("./Poste");
 const sequelize = require("../config/db");
+const connectWithRetry = sequelize.connectWithRetry;
 const Metier = require("./Metiers");
 const User = require("./User");
 
@@ -137,6 +138,7 @@ Personne.hasOne(User, {
 });
 module.exports = {
   sequelize,
+  connectWithRetry,
   Personne,
   Conge,
   Mission,
