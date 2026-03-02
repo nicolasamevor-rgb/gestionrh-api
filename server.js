@@ -75,10 +75,10 @@ const PORT = process.env.PORT || 5000;
 // on attend d'abord que la connexion soit établie (avec retries)
 connectWithRetry()
   .then(() => {
-    return sequelize.sync({ alter: true }); // Synchronisation des modèles avec la base de données
+    return sequelize.sync(); // Synchronisation des modèles avec la base de données
   })
   .then(() => {
-    server.listen(PORT, () => {
+    server.listen(PORT, "0.0.0.0", () => {
       console.log(`✅ Serveur lancé sur http://localhost:${PORT}`);
     });
   })
