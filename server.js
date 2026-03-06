@@ -29,7 +29,7 @@ const app = express();
 const server = http.createServer(app);
 // 1. Définir les options CORS une seule fois pour éviter les erreurs
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: "*",
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
